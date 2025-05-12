@@ -45,12 +45,12 @@
         {
             var zaplatilVlozne = uzivatel.StavZaplaceni switch
             {
-                (int)StavZaplaceni.Zaplaceno => "text-success",           
+                (int)StavZaplaceni.Zaplaceno => "text-success",
                 (int)StavZaplaceni.Nezaplaceno => "text-warning",
                 (int)StavZaplaceni.Zruseno => "text-muted text-decoration-line-through",
                 _ => "Neznámý stav"
             };
-                    
+
 
             <tr class="@zaplatilVlozne">
                 <td>@uzivatel.Jmeno</td>
@@ -74,19 +74,31 @@
                 </td>
             </tr>
         }
-            
-       
     </tbody>
 </table>
+
+<div>
+    <h5>Statistiky:</h5>
+    <ul>
+        <li><strong>Celkový počet registrací:</strong> @seznamUzivatelu.Count</li>
+        <li><strong>Počet aktivních registrací:</strong> @seznamUzivatelu.Count(u => u.StavZaplaceni != (int)StavZaplaceni.Zruseno)</li>
+        <li><strong>Počet zrušených registrací:</strong> @seznamUzivatelu.Count(u => u.StavZaplaceni == (int)StavZaplaceni.Zruseno)</li>
+        <li><strong>Počet zaplacených (aktivních):</strong> @seznamUzivatelu.Count(u => u.StavZaplaceni == (int)StavZaplaceni.Zaplaceno)</li>
+        <li><strong>Počet nezaplacených (aktivních):</strong> @seznamUzivatelu.Count(u => u.StavZaplaceni == (int)StavZaplaceni.Nezaplaceno)</li>
+        <li><strong>Celkem vybráno (z aktivních):</strong> @seznamUzivatelu.Where(u => u.StavZaplaceni == (int)StavZaplaceni.Zaplaceno).Sum(u => u.Vlozne)</li>
+        <li><strong>Celkem očekáváno (z aktivních):</strong> @seznamUzivatelu.Where(u => u.StavZaplaceni != (int)StavZaplaceni.Zruseno).Sum(u => u.Vlozne)</li>
+    </ul>
+</div>
 
 @code {
     private bool showValidationError = false;
     Models.RegistraceUzivatel registraceUzivatel = new Models.RegistraceUzivatel();
     List<Models.RegistraceUzivatel> seznamUzivatelu = new List<Models.RegistraceUzivatel>();
 
-    
 
-    private void Zaregistrovat() { 
+
+    private void Zaregistrovat()
+    {
         @if (registraceUzivatel.Jmeno == null || registraceUzivatel.Email == null || registraceUzivatel.Vlozne <= 0)
         {
             showValidationError = true;
@@ -97,7 +109,7 @@
         seznamUzivatelu.Add(registraceUzivatel);
 
         registraceUzivatel = new Models.RegistraceUzivatel();
-        }
+    }
 
     private void Zaplatit(Models.RegistraceUzivatel uzivatel)
     {
