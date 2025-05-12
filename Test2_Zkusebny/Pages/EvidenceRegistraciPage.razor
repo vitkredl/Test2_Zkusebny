@@ -1,0 +1,112 @@
+﻿@page "/"
+@using Test2_Zkusebny.Models
+
+<PageTitle>Registrace</PageTitle>
+
+<h1>Evidence registrací</h1>
+
+@if (showValidationError)
+{
+    <div class="alert alert-danger" role="alert">
+        Vyplňte prosím všechna pole správně.
+    </div>
+}
+
+<div>
+    <div class="mb-2">
+        <label>Jméno:</label>
+        <input type="text" @bind="registraceUzivatel.Jmeno" />
+    </div>
+    <div class="mb-2">
+        <label>Email:</label>
+        <input type="text" @bind="registraceUzivatel.Email" />
+    </div>
+    <div class="mb-2">
+        <label>Vlozne:</label>
+        <input type="number" @bind="registraceUzivatel.Vlozne" />
+    </div>
+    <div>
+        <button @onclick=Zaregistrovat>Zaregistrovat</button>
+    </div>
+</div>
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Jméno</th>
+            <th>Email</th>
+            <th>Vlozne</th>
+            <th>DatumRegistrace</th>
+            <th>Stav zaplacení</th>
+            <th>Akce</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var uzivatel in seznamUzivatelu)
+        {
+            var zaplatilVlozne = uzivatel.StavZaplaceni switch
+            {
+                (int)StavZaplaceni.Zaplaceno => "text-success",           
+                (int)StavZaplaceni.Nezaplaceno => "text-warning",
+                (int)StavZaplaceni.Zruseno => "text-muted text-decoration-line-through",
+                _ => "Neznámý stav"
+            };
+                    
+
+            <tr class="@zaplatilVlozne">
+                <td>@uzivatel.Jmeno</td>
+                <td>@uzivatel.Email</td>
+                <td>@uzivatel.DatumRegistrace.ToString("dd.MM.yy HH:mm")</td>
+                <td>@uzivatel.Vlozne</td>
+                <td><span class="@zaplatilVlozne">@((StavZaplaceni)uzivatel.StavZaplaceni)</span></td>
+                <td>
+                    @if (uzivatel.StavZaplaceni == (int)StavZaplaceni.Nezaplaceno)
+                    {
+                        <button class="btn btn-sm btn-primary me-2" @onclick="() => Zaplatit(uzivatel)">Zaplatit</button>
+                    }
+                    @if (uzivatel.StavZaplaceni != (int)StavZaplaceni.Zruseno)
+                    {
+                        <button class="btn btn-sm btn-danger" @onclick="() => Zrusit(uzivatel)">Zrušit</button>
+                    }
+                    @if (uzivatel.StavZaplaceni == (int)StavZaplaceni.Zruseno)
+                    {
+                        <span class="text-muted">Žádné akce</span>
+                    }
+                </td>
+            </tr>
+        }
+            
+       
+    </tbody>
+</table>
+
+@code {
+    private bool showValidationError = false;
+    Models.RegistraceUzivatel registraceUzivatel = new Models.RegistraceUzivatel();
+    List<Models.RegistraceUzivatel> seznamUzivatelu = new List<Models.RegistraceUzivatel>();
+
+    
+
+    private void Zaregistrovat() { 
+        @if (registraceUzivatel.Jmeno == null || registraceUzivatel.Email == null || registraceUzivatel.Vlozne <= 0)
+        {
+            showValidationError = true;
+            return;
+        }
+        showValidationError = false;
+        registraceUzivatel.StavZaplaceni = (int)StavZaplaceni.Nezaplaceno;
+        seznamUzivatelu.Add(registraceUzivatel);
+
+        registraceUzivatel = new Models.RegistraceUzivatel();
+        }
+
+    private void Zaplatit(Models.RegistraceUzivatel uzivatel)
+    {
+        uzivatel.StavZaplaceni = (int)StavZaplaceni.Zaplaceno;
+    }
+
+    private void Zrusit(Models.RegistraceUzivatel uzivatel)
+    {
+        uzivatel.StavZaplaceni = (int)StavZaplaceni.Zruseno;
+    }
+
+}
